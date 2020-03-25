@@ -58,6 +58,15 @@ func Wrap(handler http.Handler) func(ctx context.Context, event Request) (Respon
 			return Response{}, err
 		}
 
+		h := http.Header{}
+		for k, v := range event.Headers {
+			if n := strings.Index(v, ","); n > 0 {
+				h[k] = strings.Split(v, ",")
+				continue
+			}
+			h[k] = []string{v}
+		}
+
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, req)
 
