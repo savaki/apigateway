@@ -90,6 +90,9 @@ func makeRequest(event Request) (*http.Request, error) {
 
 	case event.Body != "":
 		body = strings.NewReader(event.Body)
+
+	default:
+		body = bytes.NewReader(nil)
 	}
 
 	req, err := http.NewRequest(event.RequestContext.Http.Method, uri, body)
