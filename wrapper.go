@@ -58,13 +58,12 @@ func Wrap(handler http.Handler) func(ctx context.Context, event Request) (Respon
 			return Response{}, err
 		}
 
-		h := http.Header{}
 		for k, v := range event.Headers {
 			if n := strings.Index(v, ","); n > 0 {
-				h[k] = strings.Split(v, ",")
+				req.Header[k] = strings.Split(v, ",")
 				continue
 			}
-			h[k] = []string{v}
+			req.Header[k] = []string{v}
 		}
 
 		w := httptest.NewRecorder()
@@ -118,10 +117,22 @@ func makeResponse(w *httptest.ResponseRecorder) (Response, error) {
 		body = base64.StdEncoding.EncodeToString(raw)
 	}
 
+	headers := map[string]string{}
+	for k, v := range w.Header() {
+		switch len(v) {
+		case 0:
+			// ok
+		case 1:
+			headers[k] = v[0]
+		default:
+			headers[k] = strings.Join(headers, ",")
+		}
+	}
+
 	return Response{
-		StatusCode:        w.Code,
-		MultiValueHeaders: w.Header(),
-		Body:              body,
-		IsBase64Encoded:   len(body) > 0,
+		StatusCode:      w.Code,
+		Headers:         headers,
+		Body:            body,
+		IsBase64Encoded: len(body) > 0,
 	}, nil
 }
