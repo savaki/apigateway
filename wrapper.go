@@ -125,7 +125,7 @@ func makeResponse(w *httptest.ResponseRecorder) (Response, error) {
 		case 1:
 			headers[k] = v[0]
 		default:
-			headers[k] = strings.Join(headers, ",")
+			headers[k] = strings.Join(v, ",")
 		}
 	}
 
