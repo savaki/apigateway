@@ -1,0 +1,43 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/dev",
+  "rawQueryString": "foo=bar",
+  "headers": {
+    "accept": "*/*",
+    "content-length": "11",
+    "content-type": "application/x-www-form-urlencoded",
+    "host": "v6rlfj8f7b.execute-api.us-west-2.amazonaws.com",
+    "user-agent": "curl/7.64.1",
+    "x-amzn-trace-id": "Root=1-5e7ba51d-4c0aeb26f309d2d741d5ddf8",
+    "x-forwarded-for": "73.189.109.118",
+    "x-forwarded-port": "443",
+    "x-forwarded-proto": "https"
+  },
+  "queryStringParameters": {
+    "foo": "bar"
+  },
+  "requestContext": {
+    "accountId": "850443897857",
+    "apiId": "v6rlfj8f7b",
+    "domainName": "v6rlfj8f7b.execute-api.us-west-2.amazonaws.com",
+    "domainPrefix": "v6rlfj8f7b",
+    "http": {
+      "method": "POST",
+      "path": "/dev",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "73.189.109.118",
+      "userAgent": "curl/7.64.1"
+    },
+    "requestId": "J9a8ohm4PHcEJNg=",
+    "routeKey": "$default",
+    "stage": "dev",
+    "time": "25/Mar/2020:18:38:21 +0000",
+    "timeEpoch": 1585161501587
+  },
+  "stageVariables": {
+    "Hello": "world"
+  },
+  "body": "aGVsbG8gd29ybGQ=",
+  "isBase64Encoded": true
+}
