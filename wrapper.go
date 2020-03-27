@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 )
 
@@ -50,9 +51,14 @@ type Response struct {
 	IsBase64Encoded bool              `json:"isBase64Encoded,omitempty"`
 }
 
-func Wrap(handler http.Handler) func(ctx context.Context, event Request) (Response, error) {
+func Wrap(handler http.Handler, paths ...string) func(ctx context.Context, event Request) (Response, error) {
+	prefix := filepath.Join(paths...)
+	if len(prefix) > 0 && !strings.HasPrefix(prefix, "/") {
+		prefix = "/" + prefix
+	}
+
 	return func(ctx context.Context, event Request) (Response, error) {
-		req, err := makeRequest(event)
+		req, err := makeRequest(event, prefix)
 		if err != nil {
 			return Response{}, err
 		}
@@ -77,13 +83,13 @@ func Wrap(handler http.Handler) func(ctx context.Context, event Request) (Respon
 	}
 }
 
-func makeRequest(event Request) (*http.Request, error) {
+func makeRequest(event Request, prefix string) (*http.Request, error) {
 	var uri string
 	switch event.RawQueryString {
 	case "":
-		uri = "http://" + event.RequestContext.DomainName + event.RawPath
+		uri = "http://" + event.RequestContext.DomainName + stripPrefix(event.RawPath, prefix)
 	default:
-		uri = "http://" + event.RequestContext.DomainName + event.RawPath + "?" + event.RawQueryString
+		uri = "http://" + event.RequestContext.DomainName + stripPrefix(event.RawPath, prefix) + "?" + event.RawQueryString
 	}
 
 	var body io.Reader
@@ -108,6 +114,17 @@ func makeRequest(event Request) (*http.Request, error) {
 	}
 
 	return req, nil
+}
+
+func stripPrefix(path, prefix string) string {
+	switch {
+	case prefix == "":
+		return path
+	case strings.HasPrefix(path, prefix):
+		return path[len(prefix):]
+	default:
+		return path
+	}
 }
 
 func makeResponse(w *httptest.ResponseRecorder) (Response, error) {
