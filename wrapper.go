@@ -35,26 +35,26 @@ type RequestContext struct {
 }
 
 type Request struct {
-	Version         string            `json:"version"`
-	RouteKey        string            `json:"routeKey"`
-	RawPath         string            `json:"rawPath"`
-	RawQueryString  string            `json:"rawQueryString"`
-	Headers         map[string]string `json:"headers"`
-	RequestContext  RequestContext    `json:"requestContext"`
-	StageVariables  map[string]string `json:"stageVariables"`
-	Body            string            `json:"body"`
-	IsBase64Encoded bool              `json:"isBase64Encoded"`
+	Version         string            `json:"version,omitempty"`
+	RouteKey        string            `json:"routeKey,omitempty"`
+	RawPath         string            `json:"rawPath,omitempty"`
+	RawQueryString  string            `json:"rawQueryString,omitempty"`
+	Headers         map[string]string `json:"headers,omitempty"`
+	RequestContext  RequestContext    `json:"requestContext,omitempty"`
+	StageVariables  map[string]string `json:"stageVariables,omitempty"`
+	Body            string            `json:"body,omitempty"`
+	IsBase64Encoded bool              `json:"isBase64Encoded,omitempty"`
 
 	// Version 1 Parameters
-	HttpMethod            string            `json:"httpMethod"`
-	Path                  string            `json:"path"`
-	QueryStringParameters map[string]string `json:"queryStringParameters"`
+	HttpMethod            string            `json:"httpMethod,omitempty"`
+	Path                  string            `json:"path,omitempty"`
+	QueryStringParameters map[string]string `json:"queryStringParameters,omitempty"`
 }
 
 type Response struct {
-	StatusCode      int               `json:"statusCode"`
-	Headers         map[string]string `json:"headers"`
-	Body            string            `json:"body"`
+	StatusCode      int               `json:"statusCode,omitempty"`
+	Headers         map[string]string `json:"headers,omitempty"`
+	Body            string            `json:"body,omitempty"`
 	IsBase64Encoded bool              `json:"isBase64Encoded,omitempty"`
 }
 
