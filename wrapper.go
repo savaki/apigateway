@@ -173,22 +173,6 @@ func makeV1Request(event Request) (*http.Request, error) {
 	}
 
 	setHeader(event, req)
-	//if contentType, ok := event.Headers["content-type"]; ok {
-	//	mediaType, params, err := mime.ParseMediaType(contentType)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("unable to parse media type, %v: %w", contentType, err)
-	//	}
-	//
-	//	if boundary := params["boundary"]; strings.EqualFold(mediaType, multipartContentType) && boundary != "" {
-	//		r, err := makeBody(event.Body, event.IsBase64Encoded)
-	//		if err != nil {
-	//			return nil, fmt.Errorf("unable to create request: %w", err)
-	//		}
-	//
-	//		reader := multipart.NewReader(r, boundary)
-	//		req.MultipartForm
-	//	}
-	//}
 
 	req.ContentLength = contentLength
 	req.RemoteAddr = event.Headers["x-forwarded-for"]
