@@ -8,7 +8,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -42,6 +44,11 @@ type Request struct {
 	StageVariables  map[string]string `json:"stageVariables"`
 	Body            string            `json:"body"`
 	IsBase64Encoded bool              `json:"isBase64Encoded"`
+
+	// Version 1 Parameters
+	HttpMethod            string            `json:"httpMethod"`
+	Path                  string            `json:"path"`
+	QueryStringParameters map[string]string `json:"queryStringParameters"`
 }
 
 type Response struct {
@@ -58,9 +65,20 @@ func Wrap(handler http.Handler, paths ...string) func(ctx context.Context, event
 	}
 
 	return func(ctx context.Context, event Request) (Response, error) {
-		req, err := makeRequest(event, prefix)
-		if err != nil {
-			return Response{}, err
+		var req *http.Request
+		switch event.Version {
+		case "2.0":
+			v, err := makeV2Request(event, prefix)
+			if err != nil {
+				return Response{}, err
+			}
+			req = v
+		default:
+			v, err := makeV1Request(event)
+			if err != nil {
+				return Response{}, err
+			}
+			req = v
 		}
 
 		for k, v := range event.Headers {
@@ -83,7 +101,81 @@ func Wrap(handler http.Handler, paths ...string) func(ctx context.Context, event
 	}
 }
 
-func makeRequest(event Request, prefix string) (*http.Request, error) {
+func makeBody(body string, isBase64Encoded bool) (io.Reader, error) {
+	switch {
+	case body != "" && isBase64Encoded:
+		data, err := base64.StdEncoding.DecodeString(body)
+		if err != nil {
+			return nil, fmt.Errorf("unable to base64 decode request body: %w", err)
+		}
+		return bytes.NewReader(data), nil
+
+	case body != "":
+		return strings.NewReader(body), nil
+
+	default:
+		return bytes.NewReader(nil), nil
+	}
+}
+
+func makeV1Request(event Request) (*http.Request, error) {
+	var encoded string
+	if len(event.QueryStringParameters) > 0 {
+		form := url.Values{}
+		for k, v := range event.QueryStringParameters {
+			form.Set(k, v)
+		}
+		encoded = "?" + form.Encode()
+	}
+
+	proto := event.Headers["x-forwarded-proto"]
+	if proto == "" {
+		proto = "http"
+	}
+
+	port := event.Headers["x-forwarded-port"]
+	switch {
+	case proto == "http" && port == "80":
+		port = ""
+	case proto == "https" && port == "443":
+		port = ""
+	}
+
+	var uri string
+	switch host := event.Headers["host"]; port {
+	case "":
+		uri = fmt.Sprintf("%v://%v", proto, host) + event.Path + encoded
+	default:
+		uri = fmt.Sprintf("%v://%v:%v", proto, host, port) + event.Path + encoded
+	}
+
+	body, err := makeBody(event.Body, event.IsBase64Encoded)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create request: %w", err)
+	}
+
+	req, err := http.NewRequest(event.HttpMethod, uri, body)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create request: %w", err)
+	}
+
+	var contentLength int64
+	if s, ok := event.Headers["content-length"]; ok {
+		v, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse content length, %v: %w", s, err)
+		}
+		contentLength = v
+	}
+
+	req.ContentLength = contentLength
+	req.RemoteAddr = event.Headers["x-forwarded-for"]
+	req.RequestURI = event.Path
+
+	return req, nil
+}
+
+func makeV2Request(event Request, prefix string) (*http.Request, error) {
 	var uri string
 	switch event.RawQueryString {
 	case "":
@@ -92,20 +184,9 @@ func makeRequest(event Request, prefix string) (*http.Request, error) {
 		uri = "http://" + event.RequestContext.DomainName + stripPrefix(event.RawPath, prefix) + "?" + event.RawQueryString
 	}
 
-	var body io.Reader
-	switch {
-	case event.Body != "" && event.IsBase64Encoded:
-		data, err := base64.StdEncoding.DecodeString(event.Body)
-		if err != nil {
-			return nil, fmt.Errorf("unable to base64 decode request body: %w", err)
-		}
-		body = bytes.NewReader(data)
-
-	case event.Body != "":
-		body = strings.NewReader(event.Body)
-
-	default:
-		body = bytes.NewReader(nil)
+	body, err := makeBody(event.Body, event.IsBase64Encoded)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create request: %w", err)
 	}
 
 	req, err := http.NewRequest(event.RequestContext.Http.Method, uri, body)
