@@ -18,7 +18,7 @@ func TestNewRequest(t *testing.T) {
 }
 
 func Test_makeV1Request(t *testing.T) {
-	data, err := ioutil.ReadFile("testdata/request-post-v1.json")
+	data, err := ioutil.ReadFile("testdata/request-v1-post.json")
 	if err != nil {
 		t.Fatalf("got %v; want nil", err)
 	}
@@ -54,5 +54,32 @@ func Test_makeV1Request(t *testing.T) {
 	}
 	if got, want := "/graphql", req.URL.Path; got != want {
 		t.Fatalf("got %v; want %v", got, want)
+	}
+}
+
+func Test_makeV1RequestMultipart(t *testing.T) {
+	data, err := ioutil.ReadFile("testdata/request-v1-multipart.json")
+	if err != nil {
+		t.Fatalf("got %v; want nil", err)
+	}
+
+	var event Request
+	err = json.Unmarshal(data, &event)
+	if err != nil {
+		t.Fatalf("got %v; want nil", err)
+	}
+
+	req, err := makeV1Request(event)
+	if err != nil {
+		t.Fatalf("got %v; want nil", err)
+	}
+
+	err = req.ParseMultipartForm(1e6)
+	if err != nil {
+		t.Fatalf("got %v; want nil", err)
+	}
+
+	if req.MultipartForm == nil {
+		t.Fatalf("got nil; want not nil")
 	}
 }

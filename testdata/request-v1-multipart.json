@@ -1,0 +1,23 @@
+{
+  "requestContext": {
+    "elb": {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-west-2:902118144739:targetgroup/dev-d-Serve-RHW0RBCEM2H4/b31e683d60396276"
+    }
+  },
+  "httpMethod": "POST",
+  "path": "/upload",
+  "queryStringParameters": {},
+  "headers": {
+    "accept": "*/*",
+    "content-length": "330",
+    "content-type": "multipart/form-data; boundary=------------------------daeaca094c38f128",
+    "host": "dev-d-loadb-1xcoy0h9gw154-247507225.us-west-2.elb.amazonaws.com",
+    "user-agent": "curl/7.64.1",
+    "x-amzn-trace-id": "Root=1-5e96f934-194ac6d0d2de904ce7cf0364",
+    "x-forwarded-for": "73.189.109.118",
+    "x-forwarded-port": "80",
+    "x-forwarded-proto": "http"
+  },
+  "body": "LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1kYWVhY2EwOTRjMzhmMTI4DQpDb250ZW50LURpc3Bvc2l0aW9uOiBmb3JtLWRhdGE7IG5hbWU9ImRhdGEiOyBmaWxlbmFtZT0iZG9ja2VyLWNvbXBvc2UueW1sIg0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9vY3RldC1zdHJlYW0NCg0KdmVyc2lvbjogJzMuMScKCnNlcnZpY2VzOgogIGR5bmFtbzoKICAgIGltYWdlOiBhbWF6b24vZHluYW1vZGItbG9jYWwKICAgIHJlc3RhcnQ6IGFsd2F5cwogICAgcG9ydHM6CiAgICAgIC0gIjgwMDA6ODAwMCIKDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLWRhZWFjYTA5NGMzOGYxMjgtLQ0K",
+  "isBase64Encoded": true
+}

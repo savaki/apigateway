@@ -81,14 +81,6 @@ func Wrap(handler http.Handler, paths ...string) func(ctx context.Context, event
 			req = v
 		}
 
-		for k, v := range event.Headers {
-			if n := strings.Index(v, ","); n > 0 {
-				req.Header[k] = strings.Split(v, ",")
-				continue
-			}
-			req.Header[k] = []string{v}
-		}
-
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, req)
 
@@ -98,6 +90,18 @@ func Wrap(handler http.Handler, paths ...string) func(ctx context.Context, event
 		}
 
 		return resp, nil
+	}
+}
+
+func setHeader(event Request, req *http.Request) {
+	for k, v := range event.Headers {
+		if n := strings.Index(v, ","); n > 0 {
+			for _, v := range strings.Split(v, ",") {
+				req.Header.Add(k, v)
+			}
+			continue
+		}
+		req.Header.Set(k, v)
 	}
 }
 
@@ -168,6 +172,24 @@ func makeV1Request(event Request) (*http.Request, error) {
 		contentLength = v
 	}
 
+	setHeader(event, req)
+	//if contentType, ok := event.Headers["content-type"]; ok {
+	//	mediaType, params, err := mime.ParseMediaType(contentType)
+	//	if err != nil {
+	//		return nil, fmt.Errorf("unable to parse media type, %v: %w", contentType, err)
+	//	}
+	//
+	//	if boundary := params["boundary"]; strings.EqualFold(mediaType, multipartContentType) && boundary != "" {
+	//		r, err := makeBody(event.Body, event.IsBase64Encoded)
+	//		if err != nil {
+	//			return nil, fmt.Errorf("unable to create request: %w", err)
+	//		}
+	//
+	//		reader := multipart.NewReader(r, boundary)
+	//		req.MultipartForm
+	//	}
+	//}
+
 	req.ContentLength = contentLength
 	req.RemoteAddr = event.Headers["x-forwarded-for"]
 	req.RequestURI = event.Path
@@ -193,6 +215,8 @@ func makeV2Request(event Request, prefix string) (*http.Request, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to create request: %w", err)
 	}
+
+	setHeader(event, req)
 
 	return req, nil
 }
