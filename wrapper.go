@@ -202,7 +202,20 @@ func makeV2Request(event Request, prefix string) (*http.Request, error) {
 		return nil, fmt.Errorf("unable to create request: %w", err)
 	}
 
+	var contentLength int64
+	if s, ok := event.Headers["content-length"]; ok {
+		v, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse content length, %v: %w", s, err)
+		}
+		contentLength = v
+	}
+
 	setHeader(event, req)
+
+	req.ContentLength = contentLength
+	req.RemoteAddr = event.Headers["x-forwarded-for"]
+	req.RequestURI = stripPrefix(event.RawPath, prefix)
 
 	return req, nil
 }
