@@ -35,6 +35,7 @@ type RequestContext struct {
 }
 
 type Request struct {
+	Cookies         []string          `json:"cookies,omitempty"`
 	Version         string            `json:"version,omitempty"`
 	RouteKey        string            `json:"routeKey,omitempty"`
 	RawPath         string            `json:"rawPath,omitempty"`
@@ -103,6 +104,7 @@ func setHeader(event Request, req *http.Request) {
 		}
 		req.Header.Set(k, v)
 	}
+	req.Header.Add("Cookie", strings.Join(event.Cookies, ";"))
 }
 
 func makeBody(body string, isBase64Encoded bool) (io.Reader, error) {
