@@ -1,11 +1,11 @@
 {
   "version": "2.0",
   "routeKey": "$default",
-  "rawPath": "/dev",
+  "rawPath": "/dev/abc",
   "rawQueryString": "",
   "headers": {
     "accept": "*/*",
-    "content-length": "0",
+    "content-length": "4",
     "host": "v6rlfj8f7b.execute-api.us-west-2.amazonaws.com",
     "user-agent": "curl/7.64.1",
     "x-amzn-trace-id": "Root=1-5e7ba409-cfd1f29e556a912cd7c4e768",
@@ -13,6 +13,10 @@
     "x-forwarded-port": "443",
     "x-forwarded-proto": "https"
   },
+  "cookies": [
+    "abc=123",
+    "def=456"
+  ],
   "requestContext": {
     "accountId": "850443897857",
     "apiId": "v6rlfj8f7b",
@@ -20,7 +24,7 @@
     "domainPrefix": "v6rlfj8f7b",
     "http": {
       "method": "GET",
-      "path": "/dev",
+      "path": "/dev/abc",
       "protocol": "HTTP/1.1",
       "sourceIp": "73.189.109.118",
       "userAgent": "curl/7.64.1"
